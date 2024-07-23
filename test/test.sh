@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# ./test.sh ./../build/9cc
 # 9ccのpathを受け取る
 path_9cc=$1
 
