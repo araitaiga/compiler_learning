@@ -52,6 +52,17 @@ struct Token
 
 class Tokenizer
 {
+private:
+  bool hasErrorToken(const std::string &error_report)
+  {
+    for (auto c : error_report)
+    {
+      if (c == '^')
+        return true;
+    }
+    return false;
+  }
+
 public:
   Tokenizer() {}
 
@@ -60,12 +71,28 @@ public:
     std::vector<Token> token_list;
 
     std::regex re(R"(\s*(\d+|[-+])\s*)");
-    std::smatch m;
+    std::sregex_iterator begin(str.begin(), str.end(), re);
+    std::sregex_iterator end;
 
-    for (auto it = std::sregex_iterator(str.begin(), str.end(), re); it != std::sregex_iterator(); it++)
+    size_t last_match_end = 0;
+    std::string error_report(str.size(), ' ');
+
+    for (auto it = begin; it != end; ++it)
     {
+      std::smatch match = *it;
+      size_t match_start = match.position();
+      size_t match_end = match_start + match.length();
+      if (last_match_end < match_start)
+      {
+        for (size_t i = last_match_end; i < match_start; ++i)
+        {
+          error_report[i] = '^';
+        }
+      }
+      last_match_end = match_end;
+
       Token token;
-      token.str = (*it)[0];
+      token.str = match[0];
       if (std::isdigit(token.str[0]))
       {
         token.kind = TokenKind::TK_NUM;
@@ -73,11 +100,20 @@ public:
       }
       else
       {
+        // "+" or "-"の場合
         token.kind = TokenKind::TK_RESERVED;
         token.str = token.str[0];
       }
       token_list.push_back(token);
     }
+
+    if (hasErrorToken(error_report))
+    {
+      std::cout << str << std::endl;
+      std::cout << error_report << std::endl;
+      throw std::runtime_error("error!");
+    }
+
     return token_list;
   }
 };
