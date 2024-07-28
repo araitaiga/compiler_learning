@@ -4,4 +4,4 @@ cmake_minimum_required(VERSION 3.10)
 project(CalculatorCompiler LANGUAGES CXX)
 
 # 実行ファイルを生成
-add_executable(9cc src/test1.cpp)
+add_executable(9cc src/calculator2.cpp)
