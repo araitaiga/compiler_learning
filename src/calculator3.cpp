@@ -77,9 +77,6 @@ public:
     if (token_list.back().kind != TokenKind::TK_EOF)
       throw std::runtime_error("error! last token is not EOF");
 
-    // if (token_list[0].kind != TokenKind::TK_NUM)
-    //   throw std::runtime_error("error! first token is not number");
-
     current_token = token_list.begin();
   }
 
@@ -133,16 +130,26 @@ private:
 
   std::shared_ptr<Node> mul()
   {
-    auto node = primary();
+    auto node = unary();
     while (true)
     {
       if (token_pointer.consume("*"))
-        node = newNode(NodeType::ND_MUL, node, primary());
+        node = newNode(NodeType::ND_MUL, node, unary());
       else if (token_pointer.consume("/"))
-        node = newNode(NodeType::ND_DIV, node, primary());
+        node = newNode(NodeType::ND_DIV, node, unary());
       else
         return node;
     }
+  }
+  std::shared_ptr<Node> unary()
+  {
+    if (token_pointer.consume("+"))
+      return primary();
+    else if (token_pointer.consume("-"))
+      // 単項"-"は0 - primary()として扱う
+      return newNode(NodeType::ND_SUB, newNumberNode(0), primary());
+
+    return primary();
   }
   std::shared_ptr<Node> primary()
   {
