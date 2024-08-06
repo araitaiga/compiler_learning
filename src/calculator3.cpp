@@ -77,8 +77,8 @@ public:
     if (token_list.back().kind != TokenKind::TK_EOF)
       throw std::runtime_error("error! last token is not EOF");
 
-    if (token_list[0].kind != TokenKind::TK_NUM)
-      throw std::runtime_error("error! first token is not number");
+    // if (token_list[0].kind != TokenKind::TK_NUM)
+    //   throw std::runtime_error("error! first token is not number");
 
     current_token = token_list.begin();
   }
@@ -196,7 +196,7 @@ public:
   {
     std::vector<Token> token_list;
 
-    std::regex re(R"(\s*(\d+|[-+])\s*)");
+    std::regex re(R"(\s*(\d+|[-+*/()])\s*)");
     std::sregex_iterator begin(str.begin(), str.end(), re);
     std::sregex_iterator end;
 
