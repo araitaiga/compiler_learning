@@ -12,6 +12,10 @@
 
 enum class NodeType
 {
+  ND_EQ,  // ==
+  ND_NE,  // !=
+  ND_LT,  // <
+  ND_LE,  // <=
   ND_ADD, // +
   ND_SUB, // -
   ND_MUL, // *
@@ -26,6 +30,14 @@ public:
   {
     switch (type)
     {
+    case NodeType::ND_EQ:
+      return "ND_EQ";
+    case NodeType::ND_NE:
+      return "ND_NE";
+    case NodeType::ND_LT:
+      return "ND_LT";
+    case NodeType::ND_LE:
+      return "ND_LE";
     case NodeType::ND_ADD:
       return "ND_ADD";
     case NodeType::ND_SUB:
@@ -128,6 +140,51 @@ private:
     return node;
   }
 
+  std::shared_ptr<Node> equality()
+  {
+    auto node = relational();
+    while (true)
+    {
+      if (token_pointer.consume("=="))
+        node = newNode(NodeType::ND_EQ, node, relational());
+      else if (token_pointer.consume("!="))
+        node = newNode(NodeType::ND_NE, node, relational());
+      else
+        return node;
+    }
+  }
+  std::shared_ptr<Node> relational()
+  {
+    auto node = add();
+    while (true)
+    {
+      if (token_pointer.consume("<"))
+        node = newNode(NodeType::ND_LT, node, add());
+      else if (token_pointer.consume("<="))
+        node = newNode(NodeType::ND_LE, node, add());
+      else if (token_pointer.consume(">"))
+        node = newNode(NodeType::ND_LT, add(), node);
+      else if (token_pointer.consume(">="))
+        node = newNode(NodeType::ND_LE, add(), node);
+      else
+        return node;
+    }
+  }
+
+  std::shared_ptr<Node> add()
+  {
+    auto node = mul();
+    while (true)
+    {
+      if (token_pointer.consume("+"))
+        node = newNode(NodeType::ND_ADD, node, mul());
+      else if (token_pointer.consume("-"))
+        node = newNode(NodeType::ND_SUB, node, mul());
+      else
+        return node;
+    }
+  }
+
   std::shared_ptr<Node> mul()
   {
     auto node = unary();
@@ -170,16 +227,7 @@ public:
 
   std::shared_ptr<Node> expr()
   {
-    auto node = mul();
-    while (true)
-    {
-      if (token_pointer.consume("+"))
-        node = newNode(NodeType::ND_ADD, node, mul());
-      else if (token_pointer.consume("-"))
-        node = newNode(NodeType::ND_SUB, node, mul());
-      else
-        return node;
-    }
+    return equality();
   }
 };
 
@@ -203,7 +251,10 @@ public:
   {
     std::vector<Token> token_list;
 
-    std::regex re(R"(\s*(\d+|[-+*/()])\s*)");
+    // strの先頭から、以下にマッチするものを探す
+    // [空白文字], (1桁以上の数字, >=, <=, ==, !=, +, -, *, /, (, ), <, >)のいずれか, [空白文字]
+    std::regex re(R"(\s*(\d+|<=|>=|==|!=|[-+*/()<>])\s*)");
+
     std::sregex_iterator begin(str.begin(), str.end(), re);
     std::sregex_iterator end;
 
@@ -225,7 +276,7 @@ public:
       last_match_end = match_end;
 
       Token token;
-      token.str = match[0];
+      token.str = match[0].str();
       if (std::isdigit(token.str[0]))
       {
         token.kind = TokenKind::TK_NUM;
@@ -233,9 +284,7 @@ public:
       }
       else
       {
-        // "+" or "-"の場合
         token.kind = TokenKind::TK_RESERVED;
-        token.str = token.str[0];
       }
       token_list.push_back(token);
     }
@@ -280,6 +329,26 @@ public:
     std::cout << "  pop rax" << std::endl;
     switch (node->type)
     {
+    case NodeType::ND_EQ:
+      std::cout << "  cmp rax, rdi" << std::endl;
+      std::cout << "  sete al" << std::endl;
+      std::cout << "  movzb rax, al" << std::endl;
+      break;
+    case NodeType::ND_NE:
+      std::cout << "  cmp rax, rdi" << std::endl;
+      std::cout << "  setne al" << std::endl;
+      std::cout << "  movzb rax, al" << std::endl;
+      break;
+    case NodeType::ND_LT:
+      std::cout << "  cmp rax, rdi" << std::endl;
+      std::cout << "  setl al" << std::endl;
+      std::cout << "  movzb rax, al" << std::endl;
+      break;
+    case NodeType::ND_LE:
+      std::cout << "  cmp rax, rdi" << std::endl;
+      std::cout << "  setle al" << std::endl;
+      std::cout << "  movzb rax, al" << std::endl;
+      break;
     case NodeType::ND_ADD:
       std::cout << "  add rax, rdi" << std::endl;
       break;
