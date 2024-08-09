@@ -1,18 +1,25 @@
 #!/bin/bash
 
-# ./test.sh ./../build/9cc
-# 9ccのpathを受け取る
-path_9cc=$1
+test_dir="./test"
+rm -rf $test_dir
+mkdir $test_dir
+
+echo "Building the calculator compiler..."
+build_script_path="./build.sh"
+bash $build_script_path
+
+exe_path="./build/9cc"
+echo "Exe File Path: $exe_path"
 
 assert() {
   expected="$1"
   input="$2"
 
-  # ./9cc "$input" >tmp.s
-  $path_9cc "$input" >tmp.s
+  # ./9cc "$input" >./test/tmp.s
+  $exe_path "$input" >"$test_dir/tmp.s"
   # cc -o tmp tmp.s
-  gcc -o tmp tmp.s
-  ./tmp
+  gcc -o "$test_dir/tmp" "$test_dir/tmp.s"
+  $test_dir/tmp
   actual="$?"
 
   if [ "$actual" = "$expected" ]; then
