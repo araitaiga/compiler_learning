@@ -17,6 +17,15 @@ public:
     return equality();
   }
 
+  std::shared_ptr<Node> program()
+  {
+    auto node = std::make_shared<Node>();
+    while (true)
+    {
+      // ToDo
+    }
+  }
+
 private:
   TokenPointer token_pointer;
 
@@ -34,6 +43,27 @@ private:
     auto node = std::make_shared<Node>();
     node->type = NodeType::ND_NUM;
     node->val = val;
+    return node;
+  }
+
+  std::shared_ptr<Node> stmt()
+  {
+    auto node = expr();
+    if (!token_pointer.consume(";"))
+      throw std::runtime_error("error! ';' is not found");
+    return node;
+  }
+
+  std::shared_ptr<Node> expr()
+  {
+    return assign();
+  }
+
+  std::shared_ptr<Node> assign()
+  {
+    auto node = equality();
+    if (token_pointer.consume("="))
+      node = newNode(NodeType::ND_ASSIGN, node, assign());
     return node;
   }
 

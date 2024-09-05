@@ -3,15 +3,17 @@
 
 enum class NodeType
 {
-  ND_EQ,  // ==
-  ND_NE,  // !=
-  ND_LT,  // <
-  ND_LE,  // <=
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_NUM, // 整数
+  ND_EQ,     // ==
+  ND_NE,     // !=
+  ND_LT,     // <
+  ND_LE,     // <=
+  ND_ADD,    // +
+  ND_SUB,    // -
+  ND_MUL,    // *
+  ND_DIV,    // /
+  ND_ASSIGN, // =
+  ND_LVAR,   // ローカル変数
+  ND_NUM,    // 整数
 };
 
 class OutputNodeType
@@ -37,6 +39,10 @@ public:
       return "ND_MUL";
     case NodeType::ND_DIV:
       return "ND_DIV";
+    case NodeType::ND_ASSIGN:
+      return "ND_ASSIGN";
+    case NodeType::ND_LVAR:
+      return "ND_LVAR";
     case NodeType::ND_NUM:
       return "ND_NUM";
     }
@@ -48,5 +54,6 @@ struct Node
   NodeType type;
   std::shared_ptr<Node> lhs;
   std::shared_ptr<Node> rhs;
-  int val{0};
+  int val{0};    // typeがND_NUMの場合のみ使う
+  int offset{0}; // typeがND_LVARの場合のみ使う
 };

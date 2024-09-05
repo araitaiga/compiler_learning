@@ -27,8 +27,8 @@ public:
     std::vector<Token> token_list;
 
     // strの先頭から、以下にマッチするものを探す
-    // [空白文字], (1桁以上の数字, >=, <=, ==, !=, +, -, *, /, (, ), <, >)のいずれか, [空白文字]
-    std::regex re(R"(\s*(\d+|<=|>=|==|!=|[-+*/()<>])\s*)");
+    // [空白文字], (1桁以上の数字, >=, <=, ==, !=, +, -, *, /, (, ), <, >,'a'~'z')のいずれか, [空白文字]
+    std::regex re(R"(\s*(\d+|<=|>=|==|!=|[-+*/()<>]|[a-z])\s*)");
 
     std::sregex_iterator begin(str.begin(), str.end(), re);
     std::sregex_iterator end;
@@ -56,6 +56,11 @@ public:
       {
         token.kind = TokenKind::TK_NUM;
         token.val = std::stoi(token.str);
+      }
+      else if ('a' <= token.str[0] && token.str[0] <= 'z')
+      {
+        // 変数
+        token.kind = TokenKind::TK_INDENT;
       }
       else
       {
