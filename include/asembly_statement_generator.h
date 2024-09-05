@@ -9,10 +9,17 @@ class AsemblyStatementGenerator
 public:
   AsemblyStatementGenerator() {}
 
-  void generateAllStatements(std::shared_ptr<Node> node)
+  void generateAllStatements(std::vector<std::shared_ptr<Node>> nodes)
   {
     initialState();
-    generate(node);
+    prologue();
+
+    for (auto node : nodes)
+    {
+      generate(node);
+      std::cout << "  pop rax" << std::endl;
+    }
+    epilogue();
     endState();
   }
 
@@ -24,10 +31,34 @@ private:
     std::cout << "main:" << std::endl;
   }
 
+  void prologue()
+  {
+    // 変数26個分の領域を確保する
+    std::cout << "  push rbp" << std::endl;
+    std::cout << "  mov rbp, rsp" << std::endl;
+    std::cout << "  sub rsp, 208" << std::endl;
+  }
+
+  void epilogue()
+  {
+    std::cout << "  mov rsp, rbp" << std::endl;
+    std::cout << "  pop rbp" << std::endl;
+  }
+
   void endState()
   {
-    std::cout << "  pop rax" << std::endl;
+    // std::cout << "  pop rax" << std::endl;
     std::cout << "  ret" << std::endl;
+  }
+
+  void generateLValue(std::shared_ptr<Node> node)
+  {
+    if (node->type != NodeType::ND_LVAR)
+      throw std::runtime_error("error! not lvalue");
+
+    std::cout << "  mov rax, rbp" << std::endl;
+    std::cout << "  sub rax, " << node->offset << std::endl;
+    std::cout << "  push rax" << std::endl;
   }
 
   void generate(std::shared_ptr<Node> node)
@@ -35,6 +66,28 @@ private:
     if (node->type == NodeType::ND_NUM)
     {
       std::cout << "  push " << node->val << std::endl;
+      return;
+    }
+
+    switch (node->type)
+    {
+    case NodeType::ND_NUM:
+      std::cout << "  push " << node->val << std::endl;
+      return;
+    case NodeType::ND_LVAR:
+      generateLValue(node);
+      std::cout << "  pop rax" << std::endl;
+      std::cout << "  mov rax, [rax]" << std::endl;
+      std::cout << "  push rax" << std::endl;
+      return;
+    case NodeType::ND_ASSIGN:
+      generateLValue(node->lhs);
+      generate(node->rhs);
+
+      std::cout << "  pop rdi" << std::endl;
+      std::cout << "  pop rax" << std::endl;
+      std::cout << "  mov [rax], rdi" << std::endl;
+      std::cout << "  push rdi" << std::endl;
       return;
     }
 

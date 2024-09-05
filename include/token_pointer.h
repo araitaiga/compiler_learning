@@ -35,7 +35,17 @@ public:
     return true;
   }
 
-  int getNumber()
+  bool consumeIndent(char variable)
+  {
+    if (current_token->kind != TokenKind::TK_INDENT || current_token->str[0] != variable)
+    {
+      return false;
+    }
+    ++current_token;
+    return true;
+  }
+
+  int consumeAndGetNumber()
   {
     if (current_token->kind != TokenKind::TK_NUM)
       throw std::runtime_error("error! not number");

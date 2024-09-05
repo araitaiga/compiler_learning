@@ -55,5 +55,5 @@ struct Node
   std::shared_ptr<Node> lhs;
   std::shared_ptr<Node> rhs;
   int val{0};    // typeがND_NUMの場合のみ使う
-  int offset{0}; // typeがND_LVARの場合のみ使う
+  int offset{0}; // typeがND_LVARの場合のみ使う. RBPからのオフセット
 };

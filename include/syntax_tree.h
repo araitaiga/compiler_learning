@@ -3,6 +3,7 @@
 #include "token_pointer.h"
 #include "node.h"
 #include <memory>
+#include <vector>
 
 class SyntaxTree
 {
@@ -12,18 +13,15 @@ public:
   {
   }
 
-  std::shared_ptr<Node> expr()
+  std::vector<std::shared_ptr<Node>> program()
   {
-    return equality();
-  }
-
-  std::shared_ptr<Node> program()
-  {
-    auto node = std::make_shared<Node>();
-    while (true)
+    std::vector<std::shared_ptr<Node>> nodes;
+    while (!token_pointer.atEOF())
     {
-      // ToDo
+      nodes.push_back(stmt());
     }
+    nodes.push_back(nullptr);
+    return nodes;
   }
 
 private:
@@ -37,7 +35,13 @@ private:
     node->rhs = rhs;
     return node;
   }
-
+  std::shared_ptr<Node> newLValueNode(char variable)
+  {
+    auto node = std::make_shared<Node>();
+    node->type = NodeType::ND_LVAR;
+    node->offset = (variable - 'a' + 1) * 8;
+    return node;
+  }
   std::shared_ptr<Node> newNumberNode(int val)
   {
     auto node = std::make_shared<Node>();
@@ -144,6 +148,13 @@ private:
         throw std::runtime_error("error! ')' is not found");
       return node;
     }
-    return newNumberNode(token_pointer.getNumber());
+
+    for (char c = 'a'; c <= 'z'; c++)
+    {
+      if (token_pointer.consumeIndent(c))
+        return newLValueNode(c);
+    }
+
+    return newNumberNode(token_pointer.consumeAndGetNumber());
   }
 };

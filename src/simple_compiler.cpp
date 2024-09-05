@@ -19,13 +19,11 @@ int main(int argc, char **argv)
   Tokenizer tokenizer;
   auto token_list = tokenizer.tokenize(p);
 
-  TokenPointer token_pointer(token_list);
-
   SyntaxTree syntax_tree(token_list);
-  auto node = syntax_tree.expr();
+  auto nodes = syntax_tree.program();
 
   AsemblyStatementGenerator asembly_statement_generator;
-  asembly_statement_generator.generateAllStatements(node);
+  asembly_statement_generator.generateAllStatements(nodes);
 
   return 0;
 }
