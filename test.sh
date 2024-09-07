@@ -30,45 +30,49 @@ assert() {
   fi
 }
 
-input1="1+2"
+input1="1+2;"
 expected1="3"
 assert $expected1 $input1
 
-input2="1+2-4+20"
+input2="1+2-4+20;"
 expected2="19"
 assert $expected2 $input2
 
-input3="-2*+10+21"
+input3="-2*+10+21;"
 expected3="1"
 assert $expected3 $input3
 
-input4="2*(-3+4)"
+input4="2*(-3+4);"
 expected4="2"
 assert $expected4 $input4
 
-input5="2==2"
+input5="2==2;"
 expected5="1"
 assert $expected5 $input5
 
-input6="2==3"
+input6="2==3;"
 expected6="0"
 assert $expected6 $input6
 
-input7="2!=2"
+input7="2!=2;"
 expected7="0"
 assert $expected7 $input7
 
-input8="2!=3"
+input8="2!=3;"
 expected8="1"
 assert $expected8 $input8
 
-input9="0<(3<=3)==1"
+input9="0<(3<=3)==1;"
 expected9="1"
 assert $expected9 $input9
 
 # 先に右側から評価される
-input10="0<(3==3)==1"
+input10="0<(3==3)==1;"
 expected10="1"
 assert $expected10 $input10
+
+input11="a=3;a+3;"
+expected11="6"
+assert $expected11 $input11
 
 # echo OK

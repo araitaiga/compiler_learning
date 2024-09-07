@@ -16,11 +16,11 @@ public:
   std::vector<std::shared_ptr<Node>> program()
   {
     std::vector<std::shared_ptr<Node>> nodes;
+
     while (!token_pointer.atEOF())
     {
       nodes.push_back(stmt());
     }
-    nodes.push_back(nullptr);
     return nodes;
   }
 

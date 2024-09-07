@@ -63,12 +63,6 @@ private:
 
   void generate(std::shared_ptr<Node> node)
   {
-    if (node->type == NodeType::ND_NUM)
-    {
-      std::cout << "  push " << node->val << std::endl;
-      return;
-    }
-
     switch (node->type)
     {
     case NodeType::ND_NUM:

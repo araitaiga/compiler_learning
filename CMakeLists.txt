@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-
+add_compile_options(-O0 -g -Wall)
 # C++14を使用する
 set(CMAKE_CXX_STANDARD 14)
 

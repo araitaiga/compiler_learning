@@ -27,8 +27,8 @@ public:
     std::vector<Token> token_list;
 
     // strの先頭から、以下にマッチするものを探す
-    // [空白文字], (1桁以上の数字, >=, <=, ==, !=, +, -, *, /, (, ), <, >,'a'~'z')のいずれか, [空白文字]
-    std::regex re(R"(\s*(\d+|<=|>=|==|!=|[-+*/()<>]|[a-z])\s*)");
+    // [空白文字], (1桁以上の数字, >=, <=, ==, !=, +, -, *, /, (, ), <, >,;,'a'~'z')のいずれか, [空白文字]
+    std::regex re(R"(\s*(\d+|<=|>=|==|!=|[-+*/()<>=;]|[a-z])\s*)");
 
     std::sregex_iterator begin(str.begin(), str.end(), re);
     std::sregex_iterator end;
