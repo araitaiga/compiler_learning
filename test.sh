@@ -92,7 +92,7 @@ function test() {
   expected11="6"
   assert $input11 $expected11
 
-  input12="hogeFuga_h=3;foo=3;hogeFuga_h+foo;"
+  input12="hogeFuga_h=3;Foo=3;hogeFuga_h+Foo;"
   expected12="6"
   assert $input12 $expected12
 

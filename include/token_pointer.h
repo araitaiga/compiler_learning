@@ -38,7 +38,10 @@ public:
 
   std::optional<Token> consumeIndent()
   {
-    if (current_token->kind != TokenKind::TK_INDENT || current_token->str[0] < 'a' || 'z' < current_token->str[0])
+    if (current_token->kind != TokenKind::TK_INDENT ||
+        !(('a' <= current_token->str[0] && current_token->str[0] <= 'z') ||
+          ('A' <= current_token->str[0] && current_token->str[0] <= 'Z') ||
+          current_token->str[0] == '_'))
     {
       return std::nullopt;
     }

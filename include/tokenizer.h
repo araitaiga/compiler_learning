@@ -58,7 +58,9 @@ public:
         token.kind = TokenKind::TK_NUM;
         token.val = std::stoi(token.str);
       }
-      else if ('a' <= token.str[0] && token.str[0] <= 'z')
+      else if (('a' <= token.str[0] && token.str[0] <= 'z') ||
+               ('A' <= token.str[0] && token.str[0] <= 'Z') ||
+               token.str[0] == '_')
       {
         // 変数
         token.kind = TokenKind::TK_INDENT;
