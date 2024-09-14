@@ -6,6 +6,7 @@ enum class TokenKind
   TK_INDENT,   // 識別子
   TK_NUM,      // 整数トークン
   TK_EOF,      // 入力の終わりを表すトークン
+  TK_RETURN,   // return
 };
 
 struct Token
