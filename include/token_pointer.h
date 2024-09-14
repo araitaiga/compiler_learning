@@ -1,6 +1,7 @@
 #pragma once
 #include "token.h"
 #include <vector>
+#include <optional>
 
 class TokenPointer
 {
@@ -35,14 +36,15 @@ public:
     return true;
   }
 
-  bool consumeIndent(char variable)
+  std::optional<Token> consumeIndent()
   {
-    if (current_token->kind != TokenKind::TK_INDENT || current_token->str[0] != variable)
+    if (current_token->kind != TokenKind::TK_INDENT || current_token->str[0] < 'a' || 'z' < current_token->str[0])
     {
-      return false;
+      return std::nullopt;
     }
+    Token indent_token = *current_token;
     ++current_token;
-    return true;
+    return indent_token;
   }
 
   int consumeAndGetNumber()

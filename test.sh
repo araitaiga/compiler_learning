@@ -1,26 +1,41 @@
 #!/bin/bash
 
+## global variable
 test_dir="./test"
-rm -rf $test_dir
-mkdir $test_dir
 
-echo "Building the calculator compiler..."
-build_script_path="./build.sh"
-bash $build_script_path
+## functions
+function cleanup() {
+  echo "Cleaning up..."
+  rm -rf $test_dir
+  mkdir $test_dir
+}
 
-exe_path="./build/9cc"
-echo "Exe File Path: $exe_path"
+function build() {
+  echo "Building the calculator compiler..."
+  local -r build_script_path="./build.sh"
+  bash $build_script_path
+}
 
-assert() {
-  expected="$1"
-  input="$2"
+function exeute() {
+  local -r input=$1
+  local -r exe_path="./build/9cc"
+  # echo "Exe File Path: $exe_path"
 
   # ./9cc "$input" >./test/tmp.s
   $exe_path "$input" >"$test_dir/tmp.s"
   # cc -o tmp tmp.s
   gcc -o "$test_dir/tmp" "$test_dir/tmp.s"
+
+  # binaryを実行
   $test_dir/tmp
-  actual="$?"
+}
+
+function assert() {
+  local -r input=$1
+  local -r expected=$2
+
+  exeute "$input"
+  local -r actual=$?
 
   if [ "$actual" = "$expected" ]; then
     echo -e "\e[32m$input --> $actual\e[m"
@@ -30,49 +45,77 @@ assert() {
   fi
 }
 
-input1="1+2;"
-expected1="3"
-assert $expected1 $input1
+function test() {
 
-input2="1+2-4+20;"
-expected2="19"
-assert $expected2 $input2
+  input1="1+2;"
+  expected1="3"
+  assert $input1 $expected1
 
-input3="-2*+10+21;"
-expected3="1"
-assert $expected3 $input3
+  input2="1+2-4+20;"
+  expected2="19"
+  assert $input2 $expected2
 
-input4="2*(-3+4);"
-expected4="2"
-assert $expected4 $input4
+  input3="-2*+10+21;"
+  expected3="1"
+  assert $input3 $expected3
 
-input5="2==2;"
-expected5="1"
-assert $expected5 $input5
+  input4="2*(-3+4);"
+  expected4="2"
+  assert $input4 $expected4
 
-input6="2==3;"
-expected6="0"
-assert $expected6 $input6
+  input5="2==2;"
+  expected5="1"
+  assert $input5 $expected5
 
-input7="2!=2;"
-expected7="0"
-assert $expected7 $input7
+  input6="2==3;"
+  expected6="0"
+  assert $input6 $expected6
 
-input8="2!=3;"
-expected8="1"
-assert $expected8 $input8
+  input7="2!=2;"
+  expected7="0"
+  assert $input7 $expected7
 
-input9="0<(3<=3)==1;"
-expected9="1"
-assert $expected9 $input9
+  input8="2!=3;"
+  expected8="1"
+  assert $input8 $expected8
 
-# 先に右側から評価される
-input10="0<(3==3)==1;"
-expected10="1"
-assert $expected10 $input10
+  input9="0<(3<=3)==1;"
+  expected9="1"
+  assert $input9 $expected9
 
-input11="a=3;a+3;"
-expected11="6"
-assert $expected11 $input11
+  # 先に右側から評価される
+  input10="0<(3==3)==1;"
+  expected10="1"
+  assert $input10 $expected10
 
-# echo OK
+  input11="a=3;a+3;"
+  expected11="6"
+  assert $input11 $expected11
+
+  input12="hoge=3;foo=3;hoge+foo;"
+  expected12="6"
+  assert $input12 $expected12
+
+  input13="hoge=3;foo=3;hoge-foo;"
+  expected13="0"
+  assert $input13 $expected13
+
+  input14="hoge=3;hoge*3;"
+  expected14="9"
+  assert $input14 $expected14
+
+  input15="hoge=3;piyo=20;3*(hoge+piyo);"
+  expected15="69"
+  assert $input15 $expected15
+
+  # echo OK
+}
+
+## main
+function main() {
+  cleanup
+  build
+  test
+}
+
+main

@@ -4,6 +4,8 @@
 #include "node.h"
 #include <memory>
 #include <vector>
+#include <optional>
+#include <set>
 
 class SyntaxTree
 {
@@ -26,6 +28,7 @@ public:
 
 private:
   TokenPointer token_pointer;
+  std::set<LVar> lvars;
 
   std::shared_ptr<Node> newNode(NodeType type, std::shared_ptr<Node> lhs, std::shared_ptr<Node> rhs)
   {
@@ -35,11 +38,11 @@ private:
     node->rhs = rhs;
     return node;
   }
-  std::shared_ptr<Node> newLValueNode(char variable)
+  std::shared_ptr<Node> newLValueNode(const LVar &lvar)
   {
     auto node = std::make_shared<Node>();
     node->type = NodeType::ND_LVAR;
-    node->offset = (variable - 'a' + 1) * 8;
+    node->offset = lvar.offset;
     return node;
   }
   std::shared_ptr<Node> newNumberNode(int val)
@@ -149,12 +152,31 @@ private:
       return node;
     }
 
-    for (char c = 'a'; c <= 'z'; c++)
+    auto indent_token = token_pointer.consumeIndent();
+    if (indent_token.has_value()) // 文字列の場合
     {
-      if (token_pointer.consumeIndent(c))
-        return newLValueNode(c);
+      const auto lvar = findLVar(indent_token.value().str);
+      if (!lvar)
+      {
+        // 新たなoffset位置に変数を作成
+        const LVar new_lvar = {indent_token.value().str, indent_token.value().str.size(), static_cast<int>(lvars.size() + 1) * 8};
+        lvars.insert(new_lvar);
+        return newLValueNode(new_lvar);
+      }
+      return newLValueNode(*lvar);
     }
+    else // 数値の場合
+    {
+      return newNumberNode(token_pointer.consumeAndGetNumber());
+    }
+  }
 
-    return newNumberNode(token_pointer.consumeAndGetNumber());
+  std::optional<LVar> findLVar(const std::string &name)
+  {
+    const LVar lvar_matching = {name, static_cast<int>(name.size()), 0};
+    const auto lvar_found = lvars.find(lvar_matching);
+    if (lvar_found == lvars.end())
+      return std::nullopt;
+    return *lvar_found;
   }
 };
